@@ -2,11 +2,11 @@ from nextcord.ext import commands,ipc
 import os
 import requests
 from dotenv import load_dotenv
-from flask import Flask, render_template,request,session,redirect,url_for
-from flask_discord import DiscordOAuth2Session
+from quart import Quart, render_template,request,session,redirect,url_for
+from quart_discord import DiscordOAuth2Session
 from threading import Thread
 import asyncio
-app = Flask(__name__,template_folder="Templates")
+app = Quart(__name__,template_folder="Templates")
 ipc_client = ipc.Client(secret_key = "s-n2fdZUbF0gBlex0nvgGidD74SroJrc")
 token = os.getenv("TOKEN")
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = 'true'
@@ -44,7 +44,7 @@ async def dashboard():
 	guild_count = await ipc_client.request("get_guild_count")
 	guild_ids = await ipc_client.request("get_guild_ids")
 
-	user_guilds = discord.fetch_guilds()
+	user_guilds = await discord.fetch_guilds()
 
 	guilds = []
 
@@ -67,9 +67,5 @@ async def dashboard_server(guild_id):
 		return redirect(f'https://discord.com/oauth2/authorize?&client_id={app.config["DISCORD_CLIENT_ID"]}&scope=bot&permissions=8&guild_id={guild_id}&response_type=code&redirect_uri={app.config["DISCORD_REDIRECT_URI"]}')
 	return guild["name"]
 
-def run():
-    app.run(host='0.0.0.0', port=10000, use_reloader=False, debug=True)
-
-def stay():
-	thread = Thread(target=run)
-	thread.start()
+if __name__ == "__main__":
+	app.run(host='0.0.0.0', port=10000, use_reloader=False, debug=True)
